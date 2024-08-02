@@ -1,0 +1,44 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  role      Role      @relation(fields: [roleId], references: [id])
+  roleId    Int
+  createdAt DateTime  @default(now())
+}
+
+model Role {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  permissions Permission[]
+  users       User[]
+}
+
+model Permission {
+  id         Int        @id @default(autoincrement())
+  action     String
+  role       Role       @relation(fields: [roleId], references: [id])
+  roleId     Int
+  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id])
+  menuItemId Int
+}
+
+model MenuItem {
+  id         Int         @id @default(autoincrement())
+  title      String
+  path       String
+  order      Int
+  parentId   Int?        // Nullable parentId for top-level items
+  parent     MenuItem?   @relation("SubItems", fields: [parentId], references: [id])
+  subItems   MenuItem[]  @relation("SubItems")
+  permission Permission[]
+}
