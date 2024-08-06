@@ -8,37 +8,104 @@ generator client {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  password  String
-  role      Role      @relation(fields: [roleId], references: [id])
-  roleId    Int
-  createdAt DateTime  @default(now())
+  id            String          @id @default(cuid())
+  name          String?
+  username      String?         @unique
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+  Session       Session[]
+  Account       Account?
+  Authenticator Authenticator[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Role      Role?    @relation(fields: [roleId], references: [id])
+  roleId    Int?
+}
+
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String  @unique @db.VarChar(191)
+  type                     String
+  provider                 String
+  providerAccountId        String  @db.VarChar(191) // Limit to 191 characters
+  refresh_token            String? @db.Text
+  access_token             String? @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? @db.Text
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String   @db.VarChar(191)
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String   @db.VarChar(191) // Limit to 191 characters
+  token      String   @db.VarChar(191) // Limit to 191 characters
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @db.VarChar(191) // Limit to 191 characters
+  userId               String  @db.VarChar(191)
+  providerAccountId    String  @db.VarChar(191) // Limit to 191 characters
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
 }
 
 model Role {
-  id          Int        @id @default(autoincrement())
-  name        String     @unique
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
   permissions Permission[]
   users       User[]
 }
 
 model Permission {
-  id         Int        @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   action     String
-  role       Role       @relation(fields: [roleId], references: [id])
+  role       Role     @relation(fields: [roleId], references: [id])
   roleId     Int
-  menuItem   MenuItem   @relation(fields: [menuItemId], references: [id])
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
   menuItemId Int
 }
 
 model MenuItem {
-  id         Int         @id @default(autoincrement())
+  id         Int          @id @default(autoincrement())
   title      String
   path       String
   order      Int
-  parentId   Int?        // Nullable parentId for top-level items
-  parent     MenuItem?   @relation("SubItems", fields: [parentId], references: [id])
-  subItems   MenuItem[]  @relation("SubItems")
+  parentId   Int? // Nullable parentId for top-level items
+  parent     MenuItem?    @relation("SubItems", fields: [parentId], references: [id])
+  subItems   MenuItem[]   @relation("SubItems")
   permission Permission[]
 }

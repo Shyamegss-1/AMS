@@ -1,25 +1,22 @@
-"use client";
-
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
 export default function SignIn() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const loginHandler = async (formData: FormData) => {
+    "use server";
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    const email = formData.get("email") as string | undefined;
+    const password = formData.get("password") as string | undefined;
+
     await signIn("credentials", {
       email,
       password,
       redirect: true,
-      callbackUrl: "/dashboard",
+      callbackUrl: "/",
     });
   };
 
-  console.log(email,password);
 
 
   return (
@@ -110,7 +107,7 @@ export default function SignIn() {
                           <h3>Account Login</h3>
                         </div>
                       </div>
-                      <form onSubmit={handleSubmit}>
+                      <form action={loginHandler}>
                         <div className="mb-3">
                           <label className="form-label" htmlFor="card-email">
                             Email address
@@ -119,8 +116,7 @@ export default function SignIn() {
                             className="form-control"
                             id="card-email"
                             type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            name="email"
                             placeholder="Email"
                             required
                           />
@@ -138,8 +134,7 @@ export default function SignIn() {
                             className="form-control"
                             id="card-password"
                             type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            name="password"
                             placeholder="Password"
                             required
                           />

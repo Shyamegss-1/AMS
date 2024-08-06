@@ -1,24 +1,28 @@
-import { getSession } from 'next-auth/react';
-import { getCachedMenu } from '../../lib/cache';
-import Sidebar from '@/components/sidebar/Sidebar';
-import Link from 'next/link';
+import { getSession } from "next-auth/react";
+import { getCachedMenu } from "../../lib/cache";
+import Sidebar from "@/components/sidebar/Sidebar";
+import Link from "next/link";
 
 export default async function Home() {
-  const session = await getSession();
+  // const session = await getSession();
+  // // console.log(session);
 
   // if (!session) {
   //   return (
   //     <div>
-  //       <p>You are not authorized to view this page. Please <Link href={'/auth/signin'}>sign in</Link>.</p>
+  //       <p>
+  //         You are not authorized to view this page. Please{" "}
+  //         <Link href={"/auth/signin"}>sign in</Link>.
+  //       </p>
   //     </div>
   //   );
   // }
 
-  const menuItems = await getCachedMenu(1);
+  // const menuItems = await getCachedMenu(1);
 
   return (
     <div>
-      <Sidebar menuItems={menuItems} />
+      {/* <Sidebar menuItems={menuItems} /> */}
       <main>
         <h1>Welcome to the Dashboard</h1>
       </main>
